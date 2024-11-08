@@ -74,7 +74,6 @@ def login_page():
                 st.success("Успешный вход!")
                 time.sleep(0.5)
                 if st.button("Перейти в личный кабинет"):
-                    # st.query_params.from_dict = {'page': users_db[username]['type']}
                     st.rerun()
             else:
                 st.error("Неверное имя пользователя или пароль")
@@ -95,7 +94,6 @@ def login_page():
                     st.session_state['logged_in'] = True
                     st.session_state['username'] = username
                     st.session_state['user_type'] = 'user'
-                    # st.query_params.from_dict = {'page': users_db[username]['type']}
                     st.rerun()
 
 # Личный кабинет пользователя
