@@ -72,9 +72,7 @@ def login_page():
                 st.session_state['username'] = username
                 st.session_state['user_type'] = users_db[username]['type']
                 st.success("Успешный вход!")
-                time.sleep(0.5)
-                if st.button("Перейти в личный кабинет"):
-                    st.rerun()
+                st.rerun()
             else:
                 st.error("Неверное имя пользователя или пароль")
                 if st.button("Попробовать снова"):
@@ -89,12 +87,10 @@ def login_page():
             else:
                 users_db[username] = {'password': password, 'type': 'user'}
                 st.success("Регистрация прошла успешно!")
-                time.sleep(0.5)
-                if st.button("Перейти в личный кабинет"):
-                    st.session_state['logged_in'] = True
-                    st.session_state['username'] = username
-                    st.session_state['user_type'] = 'user'
-                    st.rerun()
+                st.session_state['logged_in'] = True
+                st.session_state['username'] = username
+                st.session_state['user_type'] = 'user'
+                st.rerun()
 
 # Личный кабинет пользователя
 def user_dashboard():
@@ -147,10 +143,7 @@ def main():
             st.session_state['user_type'] = ''
             st.session_state['auth_mode'] = ''
             st.success("Вы вышли из системы.")
-            time.sleep(1)
-            if st.button("Перейти на главную страницу"):
-                st.rerun()
-                # st.stop()
+            st.rerun()
         else:
             if st.session_state['user_type'] == 'user':
                 user_dashboard()
