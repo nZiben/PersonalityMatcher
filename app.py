@@ -42,6 +42,7 @@ class Video(Base):
     ocean_scores = Column(String)  # Можно хранить в виде JSON строки
     mbti_type = Column(String)
     description = Column(Text)  # Транскрибированный текст
+    interview_score = Column(Integer)  # Добавлено поле для хранения 'I'
 
     user = relationship("User", back_populates="videos")
 
@@ -86,13 +87,14 @@ def predict_ocean_from_video(video_file):
     # Заглушка для фактического предсказания модели
     # Замените это на код вывода модели
     st.write("Обработка видео и предсказание черт OCEAN...")
-    time.sleep(2)
+    time.sleep(1)
     ocean_scores = {
         'O': random.randint(1, 100),
         'C': random.randint(1, 100),
         'E': random.randint(1, 100),
         'A': random.randint(1, 100),
-        'N': random.randint(1, 100)
+        'N': random.randint(1, 100),
+        'I': random.randint(1, 100) 
     }
     return ocean_scores
 
@@ -160,11 +162,14 @@ def user_dashboard():
         st.header("Ваш последний загруженный видео")
         st.subheader(f"Название видео: {last_video.filename}")
         st.subheader(f"Время загрузки: {last_video.upload_time}")
+        st.subheader("Вероятность что вас позовут на интервью:")
+        st.write(last_video.interview_score)
         st.subheader("Ваши баллы OCEAN:")
         st.write(eval(last_video.ocean_scores))
         st.subheader(f"Ваш тип MBTI: {last_video.mbti_type}")
         st.subheader("Подробное объяснение:")
         st.write(last_video.description)
+        
     else:
         st.write("У вас еще нет загруженных видео.")
     if st.button("Загрузить новое видео"):
@@ -174,7 +179,7 @@ def user_dashboard():
         st.header("Загрузите свое видео для оценки личности")
         video_file = st.file_uploader("Загрузить видео", type=['mp4', 'mov', 'avi'])
         if video_file is not None:
-            # Save the uploaded video to a file
+            # Сохраняем загруженное видео в файл
             user_videos_folder = f"uploaded_videos/{user.username}"
             if not os.path.exists(user_videos_folder):
                 os.makedirs(user_videos_folder)
@@ -182,25 +187,29 @@ def user_dashboard():
             video_path = os.path.join(user_videos_folder, video_filename)
             with open(video_path, 'wb') as out_file:
                 out_file.write(video_file.read())
-            # Process the video
+            # Обрабатываем видео
             ocean_scores = predict_ocean_from_video(video_path)
+            interview_score = ocean_scores['I']
+            del ocean_scores['I']
             mbti_type = ocean_to_mbti(ocean_scores)
             explanation = explain_mbti_type(mbti_type)
-            # Transcribe video audio
+            
+            # Транскрипция аудио из видео (закомментировано)
             # transcribed_text = transcribe_video_audio(video_path)
-            # Save to database
+            # Сохраняем в базу данных
             new_video = Video(
                 user_id=user.id,
                 filename=video_filename,
                 upload_time=datetime.datetime.now(),
                 ocean_scores=str(ocean_scores),
                 mbti_type=mbti_type,
-                description=explanation
+                description=explanation,
+                interview_score=interview_score  # Сохраняем 'I' как interview_score
             )
             session.add(new_video)
             session.commit()
             st.success("Видео успешно загружено и обработано!")
-            # Display the results
+            # Отображаем результаты
             st.subheader(f"Название видео: {video_filename}")
             st.subheader(f"Время загрузки: {datetime.datetime.now()}")
             st.subheader("Ваши баллы OCEAN:")
@@ -208,7 +217,9 @@ def user_dashboard():
             st.subheader(f"Ваш тип MBTI: {mbti_type}")
             st.subheader("Подробное объяснение:")
             st.write(explanation)
-            # Clear the upload_new_video flag
+            st.subheader("Вероятность что вас позовут на интервью:")  # Добавлено
+            st.write(interview_score)  # Добавлено
+            # Очищаем флаг upload_new_video
             st.session_state['upload_new_video'] = False
             st.rerun()
 
@@ -258,7 +269,7 @@ def admin_dashboard():
             if st.button("Загрузить видео"):
                 if uploaded_videos:
                     for video_file in uploaded_videos:
-                        # Save the uploaded video
+                        # Сохраняем загруженное видео
                         video_folder = f"vacancy_videos/{vacancy.id}"
                         if not os.path.exists(video_folder):
                             os.makedirs(video_folder)
@@ -266,20 +277,23 @@ def admin_dashboard():
                         video_path = os.path.join(video_folder, video_filename)
                         with open(video_path, 'wb') as out_file:
                             out_file.write(video_file.read())
-                        # Process the video
+                        # Обрабатываем видео
                         ocean_scores = predict_ocean_from_video(video_path)
+                        interview_score = ocean_scores['I']
+                        del ocean_scores['I']
                         mbti_type = ocean_to_mbti(ocean_scores)
                         explanation = explain_mbti_type(mbti_type)
-                        # Transcribe video audio
+                        # Транскрипция аудио из видео (закомментировано)
                         # transcribed_text = transcribe_video_audio(video_path)
-                        # Save to database
+                        # Сохраняем в базу данных
                         new_video = Video(
-                            user_id=None,  # Since these are candidate videos, not associated with a user
+                            user_id=None,  # Видео кандидатов, не связанных с пользователем
                             filename=video_filename,
                             upload_time=datetime.datetime.now(),
                             ocean_scores=str(ocean_scores),
                             mbti_type=mbti_type,
-                            description=explanation
+                            description=explanation,
+                            interview_score=interview_score  # Сохраняем 'I' как interview_score
                         )
                         session.add(new_video)
                         session.commit()
@@ -288,16 +302,14 @@ def admin_dashboard():
                 else:
                     st.error("Пожалуйста, загрузите видео.")
             if st.button("Получить рейтинг кандидатов"):
-                # Retrieve candidate videos for this vacancy
-                video_folder = f"vacancy_videos/{vacancy.id}"
-                if os.path.exists(video_folder):
-                    # Get all video filenames
-                    candidate_videos = os.listdir(video_folder)
-                    # For simplicity, simulate ranking
-                    ranked_candidates = candidate_videos  # В реальном сценарии вы бы ранжировали на основе критериев
+                # Получаем видео кандидатов для этой вакансии
+                candidate_videos = session.query(Video).filter_by(user_id=None).all()
+                if candidate_videos:
+                    # Отображаем рейтинг на основе interview_score
+                    ranked_candidates = sorted(candidate_videos, key=lambda x: x.interview_score, reverse=True)
                     st.subheader("Ранжированные кандидаты:")
                     for idx, candidate in enumerate(ranked_candidates, 1):
-                        st.write(f"{idx}. {candidate}")
+                        st.write(f"{idx}. {candidate.filename} - Вероятность интервью: {candidate.interview_score}")
                 else:
                     st.error("Нет загруженных видео для этой вакансии.")
             if st.button("Вернуться к списку вакансий"):
