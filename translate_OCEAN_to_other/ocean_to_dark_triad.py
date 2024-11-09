@@ -46,6 +46,10 @@ def ocean_to_dark_triad(ocean_scores):
                    psychopathy_coeffs['N'] * N +
                    psychopathy_coeffs['O'] * O)
     
+    narcissism = max(0, narcissism)
+    machiavellianism = max(0, machiavellianism)
+    psychopathy = max(0, psychopathy)
+
     # Возвращение результатов в виде словаря
     return {
         'Narcissism': narcissism,
