@@ -15,6 +15,7 @@ from sqlalchemy.orm import sessionmaker, relationship
 from translate_OCEAN_to_other.explain_mbti_type import explain_mbti_type 
 from translate_OCEAN_to_other.ocean_to_mbti import ocean_to_mbti
 from translate_OCEAN_to_other.mbti_to_ocean import mbti_to_ocean
+from translate_OCEAN_to_other.ocean_to_dark_triad import ocean_to_dark_triad
 
 # Создаем базу данных SQLite
 engine = create_engine('sqlite:///mydatabase.db')
@@ -42,6 +43,7 @@ class Video(Base):
     ocean_scores = Column(String)  # Можно хранить в виде JSON строки
     mbti_type = Column(String)
     description = Column(Text)  # Транскрибированный текст
+    interview_score = Column(Integer)  # Добавлено поле для хранения 'I'
 
     user = relationship("User", back_populates="videos")
 
@@ -86,13 +88,14 @@ def predict_ocean_from_video(video_file):
     # Заглушка для фактического предсказания модели
     # Замените это на код вывода модели
     st.write("Обработка видео и предсказание черт OCEAN...")
-    time.sleep(2)
+    time.sleep(1)
     ocean_scores = {
-        'O': random.randint(1, 100),
-        'C': random.randint(1, 100),
-        'E': random.randint(1, 100),
-        'A': random.randint(1, 100),
-        'N': random.randint(1, 100)
+        'O': random.randint(35, 100),
+        'C': random.randint(35, 100),
+        'E': random.randint(35, 100),
+        'A': random.randint(35, 100),
+        'N': random.randint(35, 100),
+        'I': random.randint(35, 100) 
     }
     return ocean_scores
 
@@ -110,8 +113,21 @@ def transcribe_video_audio(video_file: str, model_name: str = "tiny"):
 
 # Страница входа и регистрации
 def login_page():
-    st.title("Добро пожаловать!")
+
     if st.session_state['auth_mode'] == '':
+        st.title("Добро пожаловать на платформу анализа видео!")
+
+        st.header("Возможности платформы:")
+        st.subheader("Для пользователей:")
+        st.markdown("- **Загрузите видео** и получите анализ ваших личностных черт.")
+        st.markdown("- **Узнайте свой тип MBTI** и его объяснение.")
+        st.markdown("- **Оценка вероятности интервью**.")
+
+        st.subheader("Для администраторов:")
+        st.markdown("- **Создавайте и управляйте вакансиями**.")
+        st.markdown("- **Загружайте видео кандидатов** и анализируйте их.")
+        st.markdown("- **Ранжируйте кандидатов** по результатам оценки.")    
+        st.write('')
         col1, col2 = st.columns(2)
         with col1:
             if st.button("Войти"):
@@ -124,57 +140,110 @@ def login_page():
     elif st.session_state['auth_mode'] == 'login':
         username = st.text_input("Имя пользователя")
         password = st.text_input("Пароль", type='password')
-        if st.button("Войти"):
-            user = session.query(User).filter_by(username=username, password=password).first()
-            if user:
-                st.session_state['logged_in'] = True
-                st.session_state['username'] = username
-                st.session_state['user_type'] = user.user_type
-                st.success("Успешный вход!")
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Войти"):
+                user = session.query(User).filter_by(username=username, password=password).first()
+                if user:
+                    st.session_state['logged_in'] = True
+                    st.session_state['username'] = username
+                    st.session_state['user_type'] = user.user_type
+                    st.success("Успешный вход!")
+                    time.sleep(0.3)
+                    st.rerun()
+                else:
+                    st.error("Неверное имя пользователя или пароль")
+                    time.sleep(0.3)
+        with col2:
+            if st.button("Назад"):
+                st.session_state['auth_mode'] = ''
                 st.rerun()
-            else:
-                st.error("Неверное имя пользователя или пароль")
+
+
     elif st.session_state['auth_mode'] == 'register':
         username = st.text_input("Имя пользователя")
         password = st.text_input("Пароль", type='password')
-        if st.button("Зарегистрироваться"):
-            existing_user = session.query(User).filter_by(username=username).first()
-            if existing_user:
-                st.error("Имя пользователя уже существует")
-            else:
-                new_user = User(username=username, password=password, user_type='user')
-                session.add(new_user)
-                session.commit()
-                st.success("Регистрация прошла успешно!")
-                st.session_state['logged_in'] = True
-                st.session_state['username'] = username
-                st.session_state['user_type'] = 'user'
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Зарегистрироваться"):
+                existing_user = session.query(User).filter_by(username=username).first()
+                if existing_user:
+                    st.error("Имя пользователя уже существует")
+                else:
+                    new_user = User(username=username, password=password, user_type='user')
+                    session.add(new_user)
+                    session.commit()
+                    st.success("Регистрация прошла успешно!")
+                    st.session_state['logged_in'] = True
+                    st.session_state['username'] = username
+                    st.session_state['user_type'] = 'user'
+                    st.rerun()
+        with col2:
+            if st.button("Назад"):
+                st.session_state['auth_mode'] = ''
                 st.rerun()
 
 # Личный кабинет пользователя
 def user_dashboard():
     st.title(f"Добро пожаловать, {st.session_state['username']}")
     user = session.query(User).filter_by(username=st.session_state['username']).first()
-    last_video = session.query(Video).filter_by(user_id=user.id).order_by(Video.upload_time.desc()).first()
-    if last_video:
+    
+    # Получаем последние два видео пользователя
+    videos = session.query(Video).filter_by(user_id=user.id).order_by(Video.upload_time.desc()).limit(2).all()
+    
+    if videos:
+        last_video = videos[0]
         st.header("Ваш последний загруженный видео")
         st.subheader(f"Название видео: {last_video.filename}")
         st.subheader(f"Время загрузки: {last_video.upload_time}")
+        st.subheader("Вероятность, что вас позовут на интервью:")
+        st.write(f"{last_video.interview_score}%")
+        
         st.subheader("Ваши баллы OCEAN:")
-        st.write(eval(last_video.ocean_scores))
+        ocean_scores = eval(last_video.ocean_scores)
+        st.write(ocean_scores)
+        
+        st.subheader("Ваши показатели по Темной Триаде:")
+        dark_triad_scores = ocean_to_dark_triad(ocean_scores)
+        st.write(dark_triad_scores)
+        
         st.subheader(f"Ваш тип MBTI: {last_video.mbti_type}")
         st.subheader("Подробное объяснение:")
         st.write(last_video.description)
+        
+        # Если есть предпоследнее видео, выполняем сравнение
+        if len(videos) > 1:
+            prev_video = videos[1]
+            prev_ocean_scores = eval(prev_video.ocean_scores)
+            
+            st.subheader("Сравнение с предыдущим видео:")
+            st.write(f"Предыдущее видео было загружено: {prev_video.upload_time}")
+            
+            # Вычисляем разницу в баллах OCEAN
+            difference = {trait: ocean_scores[trait] - prev_ocean_scores.get(trait, 0) for trait in ocean_scores}
+            st.write("Изменение в баллах OCEAN относительно предыдущего видео:")
+            st.write(difference)
+            
+            # Определяем, стал ли пользователь лучше или хуже
+            total_difference = sum(difference.values())
+            if total_difference > 0:
+                st.success("Вы улучшили свои показатели по сравнению с предыдущим видео!")
+            elif total_difference < 0:
+                st.warning("Ваши показатели снизились по сравнению с предыдущим видео.")
+            else:
+                st.info("Ваши показатели остались без изменений.")
     else:
         st.write("У вас еще нет загруженных видео.")
+    
     if st.button("Загрузить новое видео"):
         st.session_state['upload_new_video'] = True
         st.rerun()
+    
     if 'upload_new_video' in st.session_state and st.session_state['upload_new_video']:
         st.header("Загрузите свое видео для оценки личности")
         video_file = st.file_uploader("Загрузить видео", type=['mp4', 'mov', 'avi'])
         if video_file is not None:
-            # Save the uploaded video to a file
+            # Сохраняем загруженное видео в файл
             user_videos_folder = f"uploaded_videos/{user.username}"
             if not os.path.exists(user_videos_folder):
                 os.makedirs(user_videos_folder)
@@ -182,35 +251,71 @@ def user_dashboard():
             video_path = os.path.join(user_videos_folder, video_filename)
             with open(video_path, 'wb') as out_file:
                 out_file.write(video_file.read())
-            # Process the video
+            
+            # Обрабатываем видео
             ocean_scores = predict_ocean_from_video(video_path)
+            interview_score = ocean_scores['I']
+            del ocean_scores['I']
             mbti_type = ocean_to_mbti(ocean_scores)
             explanation = explain_mbti_type(mbti_type)
-            # Transcribe video audio
-            # transcribed_text = transcribe_video_audio(video_path)
-            # Save to database
+            
+            # Сохраняем в базу данных
             new_video = Video(
                 user_id=user.id,
                 filename=video_filename,
                 upload_time=datetime.datetime.now(),
                 ocean_scores=str(ocean_scores),
                 mbti_type=mbti_type,
-                description=explanation
+                description=explanation,
+                interview_score=interview_score
             )
             session.add(new_video)
             session.commit()
             st.success("Видео успешно загружено и обработано!")
-            # Display the results
+            
+            # Отображаем результаты
             st.subheader(f"Название видео: {video_filename}")
             st.subheader(f"Время загрузки: {datetime.datetime.now()}")
             st.subheader("Ваши баллы OCEAN:")
             st.write(ocean_scores)
+            
+            st.subheader("Ваши показатели по Темной Триаде:")
+            dark_triad_scores = ocean_to_dark_triad(ocean_scores)
+            st.write(dark_triad_scores)
+            
             st.subheader(f"Ваш тип MBTI: {mbti_type}")
             st.subheader("Подробное объяснение:")
             st.write(explanation)
-            # Clear the upload_new_video flag
+            st.subheader("Вероятность, что вас позовут на интервью:")
+            st.write(f"{interview_score}%")
+            
+            # Получаем предыдущие два видео для сравнения
+            previous_videos = session.query(Video).filter_by(user_id=user.id).order_by(Video.upload_time.desc()).limit(2).all()
+            if len(previous_videos) > 1:
+                prev_video = previous_videos[1]
+                prev_ocean_scores = eval(prev_video.ocean_scores)
+                
+                st.subheader("Сравнение с предыдущим видео:")
+                st.write(f"Предыдущее видео было загружено: {prev_video.upload_time}")
+                
+                # Вычисляем разницу в баллах OCEAN
+                difference = {trait: ocean_scores[trait] - prev_ocean_scores.get(trait, 0) for trait in ocean_scores}
+                st.write("Изменение в баллах OCEAN относительно предыдущего видео:")
+                st.write(difference)
+                
+                # Определяем, стал ли пользователь лучше или хуже
+                total_difference = sum(difference.values())
+                if total_difference > 0:
+                    st.success("Вы улучшили свои показатели по сравнению с предыдущим видео!")
+                elif total_difference < 0:
+                    st.warning("Ваши показатели снизились по сравнению с предыдущим видео.")
+                else:
+                    st.info("Ваши показатели остались без изменений.")
+            
+            # Очищаем флаг загрузки
             st.session_state['upload_new_video'] = False
             st.rerun()
+
 
 # Панель администратора
 def admin_dashboard():
@@ -258,7 +363,7 @@ def admin_dashboard():
             if st.button("Загрузить видео"):
                 if uploaded_videos:
                     for video_file in uploaded_videos:
-                        # Save the uploaded video
+                        # Сохраняем загруженное видео
                         video_folder = f"vacancy_videos/{vacancy.id}"
                         if not os.path.exists(video_folder):
                             os.makedirs(video_folder)
@@ -266,20 +371,23 @@ def admin_dashboard():
                         video_path = os.path.join(video_folder, video_filename)
                         with open(video_path, 'wb') as out_file:
                             out_file.write(video_file.read())
-                        # Process the video
+                        # Обрабатываем видео
                         ocean_scores = predict_ocean_from_video(video_path)
+                        interview_score = ocean_scores['I']
+                        del ocean_scores['I']
                         mbti_type = ocean_to_mbti(ocean_scores)
                         explanation = explain_mbti_type(mbti_type)
-                        # Transcribe video audio
+                        # Транскрипция аудио из видео (закомментировано)
                         # transcribed_text = transcribe_video_audio(video_path)
-                        # Save to database
+                        # Сохраняем в базу данных
                         new_video = Video(
-                            user_id=None,  # Since these are candidate videos, not associated with a user
+                            user_id=None,  # Видео кандидатов, не связанных с пользователем
                             filename=video_filename,
                             upload_time=datetime.datetime.now(),
                             ocean_scores=str(ocean_scores),
                             mbti_type=mbti_type,
-                            description=explanation
+                            description=explanation,
+                            interview_score=interview_score  # Сохраняем 'I' как interview_score
                         )
                         session.add(new_video)
                         session.commit()
@@ -288,16 +396,15 @@ def admin_dashboard():
                 else:
                     st.error("Пожалуйста, загрузите видео.")
             if st.button("Получить рейтинг кандидатов"):
-                # Retrieve candidate videos for this vacancy
-                video_folder = f"vacancy_videos/{vacancy.id}"
-                if os.path.exists(video_folder):
-                    # Get all video filenames
-                    candidate_videos = os.listdir(video_folder)
-                    # For simplicity, simulate ranking
-                    ranked_candidates = candidate_videos  # В реальном сценарии вы бы ранжировали на основе критериев
+                # Получаем видео кандидатов для этой вакансии
+                candidate_videos = session.query(Video).filter_by(user_id=None).all()
+                if candidate_videos:
+                    # Отображаем рейтинг на основе interview_score
+                    ranked_candidates = sorted(candidate_videos, key=lambda x: x.interview_score, reverse=True)
                     st.subheader("Ранжированные кандидаты:")
                     for idx, candidate in enumerate(ranked_candidates, 1):
-                        st.write(f"{idx}. {candidate}")
+                        # st.markdown(f"<h2>{idx}. {candidate.filename} - Вероятность интервью: {candidate.interview_score} %</h2>", unsafe_allow_html=True)
+                        st.write(f"{idx}. {candidate.filename} - Вероятность интервью: {candidate.interview_score} %")
                 else:
                     st.error("Нет загруженных видео для этой вакансии.")
             if st.button("Вернуться к списку вакансий"):
