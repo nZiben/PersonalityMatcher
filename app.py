@@ -12,6 +12,9 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, F
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
+from translate_OCEAN_to_other.explain_mbti_type import explain_mbti_type # Функция для предоставления подробных текстовых объяснений результатов OCEAN и рекомендаций
+from translate_OCEAN_to_other.ocean_to_mbti import ocean_to_mbti # Функция для преобразования OCEAN в MBTI
+
 # Создаем базу данных SQLite
 engine = create_engine('sqlite:///mydatabase.db')
 Base = declarative_base()
@@ -76,26 +79,6 @@ if 'logged_in' not in st.session_state:
     st.session_state['username'] = ''
     st.session_state['user_type'] = ''
     st.session_state['auth_mode'] = ''
-
-# Функция для преобразования OCEAN в MBTI
-def ocean_to_mbti(ocean_scores):
-    # Упрощенная логика для демонстрации
-    mbti_types = ['INTJ', 'ENTP', 'ISFJ', 'ESFP']
-    return random.choice(mbti_types)
-
-# Функция для предоставления подробных текстовых объяснений результатов OCEAN
-def explain_ocean(ocean_scores):
-    explanations = {
-        'O': 'Открытость опыту: {}',
-        'C': 'Добросовестность: {}',
-        'E': 'Экстраверсия: {}',
-        'A': 'Доброжелательность: {}',
-        'N': 'Невротизм: {}'
-    }
-    details = []
-    for trait, score in ocean_scores.items():
-        details.append(explanations[trait].format(score))
-    return '\n'.join(details)
 
 # Функция для симуляции предсказания OCEAN из видео
 def predict_ocean_from_video(video_file):
@@ -200,7 +183,7 @@ def user_dashboard():
             # Process the video
             ocean_scores = predict_ocean_from_video(video_path)
             mbti_type = ocean_to_mbti(ocean_scores)
-            explanation = explain_ocean(ocean_scores)
+            explanation = explain_mbti_type(mbti_type)
             # Transcribe video audio
             # transcribed_text = transcribe_video_audio(video_path)
             # Save to database
@@ -283,7 +266,7 @@ def admin_dashboard():
                         # Process the video
                         ocean_scores = predict_ocean_from_video(video_path)
                         mbti_type = ocean_to_mbti(ocean_scores)
-                        explanation = explain_ocean(ocean_scores)
+                        explanation = explain_mbti_type(mbti_type)
                         # Transcribe video audio
                         # transcribed_text = transcribe_video_audio(video_path)
                         # Save to database
