@@ -15,6 +15,7 @@ from sqlalchemy.orm import sessionmaker, relationship
 from translate_OCEAN_to_other.explain_mbti_type import explain_mbti_type 
 from translate_OCEAN_to_other.ocean_to_mbti import ocean_to_mbti
 from translate_OCEAN_to_other.mbti_to_ocean import mbti_to_ocean
+from translate_OCEAN_to_other.ocean_to_dark_triad import ocean_to_dark_triad
 
 # Создаем базу данных SQLite
 engine = create_engine('sqlite:///mydatabase.db')
@@ -89,12 +90,12 @@ def predict_ocean_from_video(video_file):
     st.write("Обработка видео и предсказание черт OCEAN...")
     time.sleep(1)
     ocean_scores = {
-        'O': random.randint(1, 100),
-        'C': random.randint(1, 100),
-        'E': random.randint(1, 100),
-        'A': random.randint(1, 100),
-        'N': random.randint(1, 100),
-        'I': random.randint(1, 100) 
+        'O': random.randint(35, 100),
+        'C': random.randint(35, 100),
+        'E': random.randint(35, 100),
+        'A': random.randint(35, 100),
+        'N': random.randint(35, 100),
+        'I': random.randint(35, 100) 
     }
     return ocean_scores
 
@@ -112,8 +113,21 @@ def transcribe_video_audio(video_file: str, model_name: str = "tiny"):
 
 # Страница входа и регистрации
 def login_page():
-    st.title("Добро пожаловать!")
+
     if st.session_state['auth_mode'] == '':
+        st.title("Добро пожаловать на платформу анализа видео!")
+
+        st.header("Возможности платформы:")
+        st.subheader("Для пользователей:")
+        st.markdown("- **Загрузите видео** и получите анализ ваших личностных черт.")
+        st.markdown("- **Узнайте свой тип MBTI** и его объяснение.")
+        st.markdown("- **Оценка вероятности интервью**.")
+
+        st.subheader("Для администраторов:")
+        st.markdown("- **Создавайте и управляйте вакансиями**.")
+        st.markdown("- **Загружайте видео кандидатов** и анализируйте их.")
+        st.markdown("- **Ранжируйте кандидатов** по результатам оценки.")    
+
         col1, col2 = st.columns(2)
         with col1:
             if st.button("Войти"):
@@ -126,31 +140,47 @@ def login_page():
     elif st.session_state['auth_mode'] == 'login':
         username = st.text_input("Имя пользователя")
         password = st.text_input("Пароль", type='password')
-        if st.button("Войти"):
-            user = session.query(User).filter_by(username=username, password=password).first()
-            if user:
-                st.session_state['logged_in'] = True
-                st.session_state['username'] = username
-                st.session_state['user_type'] = user.user_type
-                st.success("Успешный вход!")
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Войти"):
+                user = session.query(User).filter_by(username=username, password=password).first()
+                if user:
+                    st.session_state['logged_in'] = True
+                    st.session_state['username'] = username
+                    st.session_state['user_type'] = user.user_type
+                    st.success("Успешный вход!")
+                    time.sleep(0.3)
+                    st.rerun()
+                else:
+                    st.error("Неверное имя пользователя или пароль")
+                    time.sleep(0.3)
+        with col2:
+            if st.button("Назад"):
+                st.session_state['auth_mode'] = ''
                 st.rerun()
-            else:
-                st.error("Неверное имя пользователя или пароль")
+
+
     elif st.session_state['auth_mode'] == 'register':
         username = st.text_input("Имя пользователя")
         password = st.text_input("Пароль", type='password')
-        if st.button("Зарегистрироваться"):
-            existing_user = session.query(User).filter_by(username=username).first()
-            if existing_user:
-                st.error("Имя пользователя уже существует")
-            else:
-                new_user = User(username=username, password=password, user_type='user')
-                session.add(new_user)
-                session.commit()
-                st.success("Регистрация прошла успешно!")
-                st.session_state['logged_in'] = True
-                st.session_state['username'] = username
-                st.session_state['user_type'] = 'user'
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Зарегистрироваться"):
+                existing_user = session.query(User).filter_by(username=username).first()
+                if existing_user:
+                    st.error("Имя пользователя уже существует")
+                else:
+                    new_user = User(username=username, password=password, user_type='user')
+                    session.add(new_user)
+                    session.commit()
+                    st.success("Регистрация прошла успешно!")
+                    st.session_state['logged_in'] = True
+                    st.session_state['username'] = username
+                    st.session_state['user_type'] = 'user'
+                    st.rerun()
+        with col2:
+            if st.button("Назад"):
+                st.session_state['auth_mode'] = ''
                 st.rerun()
 
 # Личный кабинет пользователя
@@ -309,7 +339,8 @@ def admin_dashboard():
                     ranked_candidates = sorted(candidate_videos, key=lambda x: x.interview_score, reverse=True)
                     st.subheader("Ранжированные кандидаты:")
                     for idx, candidate in enumerate(ranked_candidates, 1):
-                        st.write(f"{idx}. {candidate.filename} - Вероятность интервью: {candidate.interview_score}")
+                        # st.markdown(f"<h2>{idx}. {candidate.filename} - Вероятность интервью: {candidate.interview_score} %</h2>", unsafe_allow_html=True)
+                        st.write(f"{idx}. {candidate.filename} - Вероятность интервью: {candidate.interview_score} %")
                 else:
                     st.error("Нет загруженных видео для этой вакансии.")
             if st.button("Вернуться к списку вакансий"):
