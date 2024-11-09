@@ -1,1 +1,4 @@
 venv/
+mydatabase.db
+uploaded_videos/
+vacancy_videos/
