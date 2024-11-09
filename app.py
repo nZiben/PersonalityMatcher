@@ -159,6 +159,7 @@ def user_dashboard():
     if last_video:
         st.header("Ваш последний загруженный видео")
         st.subheader(f"Название видео: {last_video.filename}")
+        st.subheader(f"Время загрузки: {last_video.upload_time}")
         st.subheader("Ваши баллы OCEAN:")
         st.write(eval(last_video.ocean_scores))
         st.subheader(f"Ваш тип MBTI: {last_video.mbti_type}")
@@ -186,7 +187,7 @@ def user_dashboard():
             mbti_type = ocean_to_mbti(ocean_scores)
             explanation = explain_mbti_type(mbti_type)
             # Transcribe video audio
-            transcribed_text = transcribe_video_audio(video_path)
+            # transcribed_text = transcribe_video_audio(video_path)
             # Save to database
             new_video = Video(
                 user_id=user.id,
@@ -201,7 +202,7 @@ def user_dashboard():
             st.success("Видео успешно загружено и обработано!")
             # Display the results
             st.subheader(f"Название видео: {video_filename}")
-            st.subheader(f"Название видео: {video_filename}")
+            st.subheader(f"Время загрузки: {datetime.datetime.now()}")
             st.subheader("Ваши баллы OCEAN:")
             st.write(ocean_scores)
             st.subheader(f"Ваш тип MBTI: {mbti_type}")
@@ -270,7 +271,7 @@ def admin_dashboard():
                         mbti_type = ocean_to_mbti(ocean_scores)
                         explanation = explain_mbti_type(mbti_type)
                         # Transcribe video audio
-                        transcribed_text = transcribe_video_audio(video_path)
+                        # transcribed_text = transcribe_video_audio(video_path)
                         # Save to database
                         new_video = Video(
                             user_id=None,  # Since these are candidate videos, not associated with a user
