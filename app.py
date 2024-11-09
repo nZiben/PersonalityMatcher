@@ -12,8 +12,9 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, F
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
-from translate_OCEAN_to_other.explain_mbti_type import explain_mbti_type # Функция для предоставления подробных текстовых объяснений результатов OCEAN и рекомендаций
-from translate_OCEAN_to_other.ocean_to_mbti import ocean_to_mbti # Функция для преобразования OCEAN в MBTI
+from translate_OCEAN_to_other.explain_mbti_type import explain_mbti_type 
+from translate_OCEAN_to_other.ocean_to_mbti import ocean_to_mbti
+from translate_OCEAN_to_other.mbti_to_ocean import mbti_to_ocean
 
 # Создаем базу данных SQLite
 engine = create_engine('sqlite:///mydatabase.db')
