@@ -186,7 +186,7 @@ def user_dashboard():
             mbti_type = ocean_to_mbti(ocean_scores)
             explanation = explain_mbti_type(mbti_type)
             # Transcribe video audio
-            # transcribed_text = transcribe_video_audio(video_path)
+            transcribed_text = transcribe_video_audio(video_path)
             # Save to database
             new_video = Video(
                 user_id=user.id,
@@ -200,6 +200,7 @@ def user_dashboard():
             session.commit()
             st.success("Видео успешно загружено и обработано!")
             # Display the results
+            st.subheader(f"Название видео: {video_filename}")
             st.subheader(f"Название видео: {video_filename}")
             st.subheader("Ваши баллы OCEAN:")
             st.write(ocean_scores)
@@ -269,7 +270,7 @@ def admin_dashboard():
                         mbti_type = ocean_to_mbti(ocean_scores)
                         explanation = explain_mbti_type(mbti_type)
                         # Transcribe video audio
-                        # transcribed_text = transcribe_video_audio(video_path)
+                        transcribed_text = transcribe_video_audio(video_path)
                         # Save to database
                         new_video = Video(
                             user_id=None,  # Since these are candidate videos, not associated with a user
