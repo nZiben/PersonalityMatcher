@@ -1,4 +1,3 @@
-# Test function to find OCEAN scores that do not match any MBTI type
 def ocean_to_mbti(ocean_scores):
     O, C, E, A, N = ocean_scores['O'], ocean_scores['C'], ocean_scores['E'], ocean_scores['A'], ocean_scores['N']
 
@@ -35,4 +34,38 @@ def ocean_to_mbti(ocean_scores):
     elif O > 0.07 and O <= 0.36 and C > 0.15 and C <= 0.42 and E > 0.6 and E <= 0.92 and A < 0.31 and N < 0.5:
         return 'INFJ'
 
-    return 'Undefined type - general'
+    # Если не найдено точного соответствия, находим ближайший MBTI тип
+    mbti_ocean_mapping = {
+        'INFJ': {'O': 0.77, 'C': 0.715, 'E': 0.25, 'A': 0.75, 'N': 0.64},
+        'INFP': {'O': 0.75, 'C': 0.16, 'E': 0.325, 'A': 0.59, 'N': 0.77},
+        'INTJ': {'O': 0.76, 'C': 0.77, 'E': 0.195, 'A': 0.195, 'N': 0.55},
+        'INTP': {'O': 0.705, 'C': 0.255, 'E': 0.245, 'A': 0.11, 'N': 0.65},
+        'ISFJ': {'O': 0.25, 'C': 0.52, 'E': 0.2, 'A': 0.82, 'N': 0.75},
+        'ISFP': {'O': 0.34, 'C': 0.11, 'E': 0.235, 'A': 0.71, 'N': 0.855},
+        'ISTJ': {'O': 0.165, 'C': 0.75, 'E': 0.145, 'A': 0.215, 'N': 0.81},
+        'ISTP': {'O': 0.26, 'C': 0.15, 'E': 0.235, 'A': 0.09, 'N': 0.77},
+        'ENFJ': {'O': 0.765, 'C': 0.805, 'E': 0.775, 'A': 0.87, 'N': 0.25},
+        'ENFP': {'O': 0.875, 'C': 0.22, 'E': 0.815, 'A': 0.785, 'N': 0.21},
+        'ENTJ': {'O': 0.685, 'C': 0.86, 'E': 0.84, 'A': 0.25, 'N': 0.2},
+        'ENTP': {'O': 0.815, 'C': 0.53, 'E': 0.81, 'A': 0.145, 'N': 0.18},
+        'ESFJ': {'O': 0.29, 'C': 0.675, 'E': 0.73, 'A': 0.875, 'N': 0.45},
+        'ESFP': {'O': 0.225, 'C': 0.255, 'E': 0.805, 'A': 0.8, 'N': 0.5},
+        'ESTJ': {'O': 0.255, 'C': 0.845, 'E': 0.675, 'A': 0.31, 'N': 0.235},
+        'ESTP': {'O': 0.215, 'C': 0.285, 'E': 0.76, 'A': 0.155, 'N': 0.25},
+    }
+
+    # Вычисляем евклидово расстояние до каждого MBTI типа
+    min_distance = float('inf')
+    closest_mbti = None
+
+    for mbti_type, scores in mbti_ocean_mapping.items():
+        distance = ((O - scores['O']) ** 2 +
+                    (C - scores['C']) ** 2 +
+                    (E - scores['E']) ** 2 +
+                    (A - scores['A']) ** 2 +
+                    (N - scores['N']) ** 2) ** 0.5
+        if distance < min_distance:
+            min_distance = distance
+            closest_mbti = mbti_type
+
+    return closest_mbti
