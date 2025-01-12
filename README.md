@@ -92,15 +92,18 @@ ffmpeg-python is a Python library providing a convenient interface to use FFmpeg
 
 1. Install Homebrew (if not already installed):
    ```bash
-   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)```
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)
+   ```
    
 2. Install FFmpeg:
    ```bash
-   brew install ffmpeg```
+   brew install ffmpeg
+   ```
    
 3. Check the installation:
    ```bash
-   ffmpeg -version```
+   ffmpeg -version
+   ```
    
 ## Windows
 
@@ -121,20 +124,23 @@ ffmpeg-python is a Python library providing a convenient interface to use FFmpeg
 4. Check the installation:
 Open the command prompt (CMD) and type:
       ```bash
-      ffmpeg -version```
+      ffmpeg -version
+      ```
 If the installation is successful, you will see information about the FFmpeg version.
 
 ## Linux
 
 To install FFmpeg on Linux, use your distribution's package manager.:
       ```bash
-      sudo apt-get install ffmpeg```
+      sudo apt-get install ffmpeg
+      ```
 
 # Installing ffmpeg-python library
 
 After installing FFmpeg, you can install the ffmpeg-python library via pip:
       ```bash
-      pip install ffmpeg-python ```
+      pip install ffmpeg-python 
+      ```
 
 Done. Now you can use the app.
 
@@ -151,15 +157,18 @@ Done. Now you can use the app.
 1. **Clone the repository**:
     ```bash
     git clone https://github.com/nZiben/video_cv_matching.git
-    cd video_cv_matching```
+    cd video_cv_matching
+    ```
 
 2. **Build a Docker image**:
     ```bash
-    docker build -t video_cv_matching_image .```
+    docker build -t video_cv_matching_image .
+    ```
 
 3. **Launch the Docker container**:
     ```bash
-    docker run -p 8501:8501 video_cv_matching_image```
+    docker run -p 8501:8501 video_cv_matching_image
+    ```
 
 4. **Open the app**:
     - Go to the browser and open [http://localhost:8501 ](http://localhost:8501 ) to see the application interface.
@@ -171,10 +180,12 @@ Done. Now you can use the app.
 1. Open a new terminal.
 2. Enter the command to find out the ID of the running container.:
     ```bash
-    docker ps```
+    docker ps
+    ```
 3. Use the `docker stop` command to stop the container:
     ```bash
-    docker stop <CONTAINER_ID>```
+    docker stop <CONTAINER_ID>
+    ```
    Replace the `<CONTAINER_ID>` with the ID of your container.
 
 ### Restarting an existing container
@@ -183,11 +194,13 @@ To restart a previously stopped container:
 
 1. Find his `CONTAINER ID` or name using:
     ```bash
-    docker ps -a```
+    docker ps -a
+    ```
     
 2. Then use the command:
     ```bash
-    docker start <CONTAINER_ID or name>```
+    docker start <CONTAINER_ID or name>
+    ```
 
 ### Restarting the container with reassembly
 
@@ -195,11 +208,13 @@ If you need to make changes to the image and reassemble the container:
 
 1. Rebuild the image:
     ```bash
-    docker build -t video_cv_matching_image .```
+    docker build -t video_cv_matching_image .
+    ```
 
 2. Restart the container:
     ```bash
-    docker run -p 8501:8501 video_cv_matching_image```
+    docker run -p 8501:8501 video_cv_matching_image
+    ```
 
 ## Additional information
 
