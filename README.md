@@ -1,219 +1,218 @@
-# Предсказание типа личности по видеовизитке и рекомендации по профессиям учитывая показатели OCEAN, MBTI и Тёмной триады
+# Prediction of Personality Type via Video Résumé and Job Recommendations Considering OCEAN, MBTI, and the Dark Triad Indicators
 
-## Обзор проекта
+## Project Overview
 
-Этот проект направлен на предсказание типа личности человека на основе модели OCEAN, используя несколько доменов. Решение является прозрачным и обеспечивает высокую скорость работы — примерно 1 секунда на видео (отметим, что модель квантована). Также был собран список профессий, сопоставленных с типами личности OCEAN, MBTI и Тёмной триады.
+This project aims to predict an individual's personality type based on the OCEAN model using multiple domains. The solution is transparent and ensures high-speed operation — approximately 1 second per video (note that the model is quantized). Additionally, a list of professions has been compiled, mapped to personality types based on OCEAN, MBTI, and the Dark Triad.
 
-## Функциональные особенности и техническое решение
+## Functional Features and Technical Solution
 
-1. ### Мультимодальная модель анализа личности
-   Модель обрабатывает три типа данных (текст, аудио, видео), что позволяет точно анализировать личностные характеристики по системе **OCEAN** и преобразовывать их в **MBTI**. Такой подход обеспечивает:
-   - Глубокое понимание контекста,
-   - Высокую устойчивость к шуму,
-   - Повышенную интерпретацию эмоций.
-   - Обеспечивает прозрачность решений.
+1. ### Multimodal Personality Analysis Model
+   The model processes three types of data (text, audio, video), allowing for precise analysis of personality characteristics based on the **OCEAN** system and converting them into **MBTI**. This approach ensures:
+   - Deep contextual understanding,
+   - High noise resilience,
+   - Enhanced emotional interpretation,
+   - Decision transparency.
 
-2. ### Трансформация OCEAN в MBTI и «Темную триаду»
-   На основе эмпирических данных и распределений **OCEAN** по каждому из типов **MBTI** реализована точная конвертация:
-   - Собран и обработан список профессий.
-   - Профессии сопоставлены с типами личности OCEAN и MBTI.
-   - Для MBTI — используем пороговые значения, коррелирующие с OCEAN,
-   - Для «Темной триады» — коэффициенты для каждой характеристики OCEAN, чтобы строить профиль по каждому признаку.
+2. ### Transformation of OCEAN into MBTI and the "Dark Triad"
+   Using empirical data and the distribution of **OCEAN** across each **MBTI** type, accurate conversion is implemented:
+   - A list of professions was compiled and processed.
+   - Professions were mapped to OCEAN and MBTI personality types.
+   - For MBTI — threshold values correlated with OCEAN were used,
+   - For the "Dark Triad" — coefficients for each OCEAN trait to build a profile for each characteristic.
 
-4. ### Скорость работы модели
-   Высокая скорость обработки (~1 секунда на видео) благодаря оптимизированной квантованной модели. Подходит для работы с большими массивами данных, что критично для быстрого подбора и ранжирования.
+3. ### Model Processing Speed
+   High processing speed (~1 second per video) due to an optimized quantized model. Suitable for handling large datasets, critical for quick selection and ranking.
 
-5. ### Двухэтапное ранжирование вакансий
-   Используем поиск **BM25** для текстового анализа вакансий и персонализируем ранжирование с помощью оценки OCEAN. Это позволяет находить наиболее релевантные вакансии для каждого кандидата.
-
----
-
-## Killer-фичи проекта
-- **Преобразование OCEAN в MBTI и Dark Triad**: Научно обоснованное и точное преобразование позволяет расширить варианты анализа.
-- **Мультимодальный подход**: Анализ видео, аудио и текста обеспечивает максимальную точность в оценке.
-- **Двухэтапное ранжирование вакансий**: Технология, повышающая релевантность рекомендаций.
+4. ### Two-Stage Job Vacancy Ranking
+   We use **BM25** search for textual vacancy analysis and personalize the ranking using OCEAN assessment. This allows finding the most relevant vacancies for each candidate.
 
 ---
 
-## Стек технологий
+## Project Killer Features
+- **OCEAN-to-MBTI and Dark Triad Transformation**: Scientifically grounded and accurate transformation enables expanded analysis options.
+- **Multimodal Approach**: Analysis of video, audio, and text ensures maximum assessment accuracy.
+- **Two-Stage Job Ranking**: Technology that enhances recommendation relevance.
+
+---
+
+## Technology Stack
 - Python, PyTorch, OpenCV, Librosa, Whisper, Streamlit
 - SQLite, SQLAlchemy
 - Transformers, FaceNet, MTCNN, Catboost, Sber LightAutoML
 
 ---
 
-## Уникальность решения
-Проект выделяется благодаря точной интеграции трёх модальностей, возможности перевода системы OCEAN в MBTI и тёмную триаду, а также высокому уровню интерпретируемости для всех участников процесса (работодателя и кандидата).
+## Solution Uniqueness
+The project stands out for its precise integration of three modalities, the ability to translate the OCEAN system into MBTI and the Dark Triad, and a high level of interpretability for all participants (employers and candidates).
 ---
 
-### Графический интерфейс
+### Graphical Interface
 
-#### Для работника
-- Личный кабинет для загрузки видео.
-- Получение текстовой обратной связи.
-- Просмотр рекомендаций по профессиям с ранжированным списком вакансий.
-- Дополнительная функция: возможность заработка на платформе.
+#### For Employees
+- A personal dashboard for video uploads.
+- Receiving textual feedback.
+- Viewing job recommendations with a ranked vacancy list.
+- Additional feature: earning on the platform.
 
-#### Для работодателя
-- Админ-панель для загрузки ряда видео.
-- Указание желаемой профессии и искомого типа личности.
-- Получение ранжированного списка кандидатов.
+#### For Employers
+- Admin panel for uploading multiple videos.
+- Specifying desired profession and personality type.
+- Receiving a ranked list of candidates.
 
-### Перевод OCEAN в систему MBTI и другие
-- Перевод результатов в типы MBTI.
-- Конвертация в другие системы оценки личности.
-- Текстовое объяснение сильных и слабых сторон пользователя.
+### Conversion of OCEAN to MBTI and Other Systems
+- Translation of results into MBTI types.
+- Conversion to other personality assessment systems.
+- Textual explanation of user strengths and weaknesses.
 
-## Структура проекта
-```
-model/         — модель предсказания типа личности.
-professions/   — сопоставление профессий.
-translation/   — инструменты для перевода между системами OCEAN, MBTI и другими.
-app_with_model.py - приложение с предсказанием модели (длительная инициализация, требования к оперативной памяти)
-app.py         — основное приложение
-```
+## Project Structure
 
-## Установка и запуск
+model/ — personality type prediction model. 
+professions/ — mapping of professions. 
+translation/ — tools for translating between OCEAN, MBTI, and other systems. 
+app_with_model.py - application with model prediction (long initialization, memory requirements). 
+app.py — main application.
 
-Инструкции по установке и запуску проекта будут предоставлены в последующих разделах.
+## Installation and Launch
 
-# FFmpeg и ffmpeg-python
+Instructions for installing and launching the project will be provided in subsequent sections.
 
-## Что такое FFmpeg?
+# FFmpeg and ffmpeg-python
 
-FFmpeg — это мощный инструмент для обработки мультимедийных файлов. Он позволяет выполнять множество операций с аудио и видео.
+## What is FFmpeg?
 
-## Что такое ffmpeg-python?
+FFmpeg is a powerful tool for processing multimedia files. It enables numerous audio and video operations.
 
-ffmpeg-python — это Python-библиотека, которая предоставляет удобный интерфейс для использования возможностей FFmpeg из Python-кода. Она позволяет легко интегрировать функции обработки медиа в свои приложения.
+## What is ffmpeg-python?
 
-# Установка FFmpeg
+ffmpeg-python is a Python library providing a convenient interface to use FFmpeg's capabilities within Python code. It allows easy integration of media processing functions into applications.
+
+# Installing FFmpeg
 
 ## macOS
 
-1. Установите Homebrew (если он еще не установлен):
+1. Install Homebrew (if not already installed):
    ```bash
-   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)»```
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)```
    
-2. Установите FFmpeg:
+2. Install FFmpeg:
    ```bash
    brew install ffmpeg```
    
-3. Проверьте установку:
-   ```bash
+3. Check the installation:
+``bash
    ffmpeg -version```
    
 ## Windows
 
-1. Скачайте FFmpeg:
-   Перейдите на официальный сайт FFmpeg и выберите версию для Windows. Рекомендуется использовать сборку от gyan.dev или другой надежный источник.
+1. Download FFmpeg:
+   Go to the FFmpeg official website and select the Windows version. It is recommended to use the build from gyan.dev or another reliable source.
 
-2. Распакуйте архив:
-   После загрузки архива (обычно в формате .zip), распакуйте его.
+2. Unpack the archive:
+   After downloading the archive (usually in the format .zip), unpack it.
 
-3. Добавьте FFmpeg в PATH:
+3. Add FFmpeg to the PATH:
 
-   - Нажмите ```Win + R```, введите sysdm.cpl и нажмите Enter.
-   - Перейдите на вкладку "Дополнительно" и нажмите "Переменные среды".
-   - В разделе "Системные переменные" найдите переменную Path, выберите ее и нажмите "Изменить".
-   - Нажмите "Создать" и добавьте путь к папке bin внутри директории FFmpeg, например: C:ffmpegbin.
-   - Нажмите "OK", чтобы сохранить изменения.
+   - Press ``Win + R``, type sysdm.cpl and press Enter.
+   - Go to the Advanced tab and click on Environment Variables.
+   - In the "System Variables" section, find the Path variable, select it and click "Edit".
+   - Click "Create" and add the path to the bin folder inside the FFmpeg directory, for example: C:ffmpegbin.
+   - Click "OK" to save the changes.
 
-4. Проверьте установку:
-   Откройте командную строку (CMD) и введите:
+4. Check the installation:
+Open the command prompt (CMD) and type:
    ```bash
    ffmpeg -version```
-      Если установка прошла успешно, вы увидите информацию о версии FFmpeg.
+      If the installation is successful, you will see information about the FFmpeg version.
 
 ## Linux
 
-Для установки FFmpeg на Linux используйте пакетный менеджер вашей дистрибуции:
+To install FFmpeg on Linux, use your distribution's package manager.:
 ```bash
 sudo apt-get install ffmpeg
 ```
 
-# Установка библиотеки ffmpeg-python
+# Installing ffmpeg-python library
 
-После установки FFmpeg вы можете установить библиотеку ffmpeg-python через pip:
+After installing FFmpeg, you can install the ffmpeg-python library via pip:
 ```bash
 pip install ffmpeg-python
 ```
 
-Готово. Теперь можно пользоваться приложением.
+Done. Now you can use the app.
 
-> **Примечание:** FFmpeg нужен для запуска Streamlit, не забудьте об этом!
+> **Note:** FFmpeg is needed to run Streamlit, don't forget about it!
 
 
-# Запуск Docker-контейнера
+# Launching a Docker container
 
-## Требования
-- **Docker** — убедитесь, что Docker установлен на вашем устройстве. Если Docker не установлен, загрузите его с официального сайта: [Docker](https://www.docker.com/products/docker-desktop).
+## Requirements
+- **Docker** — Make sure that Docker is installed on your device. If Docker is not installed, download it from the official website: [Docker](https://www.docker.com/products/docker-desktop ).
 
-## Установка и Запуск
+## Installation and Launch
 
-1. **Клонируйте репозиторий**:
-    ```bash
+1. **Clone the repository**:
+``bash
     git clone https://github.com/nZiben/video_cv_matching.git
     cd video_cv_matching
     ```
 
-2. **Соберите Docker-образ**:
-    ```bash
+2. **Build a Docker image**:
+``bash
     docker build -t video_cv_matching_image .
     ```
 
-3. **Запустите Docker-контейнер**:
-    ```bash
+3. **Launch the Docker container**:
+``bash
     docker run -p 8501:8501 video_cv_matching_image
     ```
 
-4. **Откройте приложение**:
-    - Перейдите в браузер и откройте [http://localhost:8501](http://localhost:8501), чтобы увидеть интерфейс приложения.
+4. **Open the app**:
+    - Go to the browser and open [http://localhost:8501 ](http://localhost:8501 ) to see the application interface.
 
-## Остановка и Перезапуск контейнера
+## Stopping and Restarting the container
 
-### Остановка контейнера
+### Container stop
 
-1. Откройте новый терминал.
-2. Введите команду, чтобы узнать ID запущенного контейнера:
+1. Open a new terminal.
+2. Enter the command to find out the ID of the running container.:
     ```bash
     docker ps
     ```
-3. Используйте команду `docker stop`, чтобы остановить контейнер:
-    ```bash
+3. Use the `docker stop` command to stop the container:
+``bash
     docker stop <CONTAINER_ID>
     ```
-   Замените `<CONTAINER_ID>` на ID вашего контейнера.
+   Replace the `<CONTAINER_ID>` with the ID of your container.
 
-### Перезапуск существующего контейнера
+### Restarting an existing container
 
-Чтобы перезапустить ранее остановленный контейнер:
+To restart a previously stopped container:
 
-1. Найдите его `CONTAINER ID` или имя с помощью:
+1. Find his `CONTAINER ID` or name using:
     ```bash
     docker ps -a
     ```
-
-2. Затем используйте команду:
-    ```bash
-    docker start <CONTAINER_ID или имя>
+    
+2. Then use the command:
+``bash
+    docker start <CONTAINER_ID or name>
     ```
 
-### Перезапуск контейнера с пересборкой
+### Restarting the container with reassembly
 
-Если вам нужно внести изменения в образ и заново собрать контейнер:
+If you need to make changes to the image and reassemble the container:
 
-1. Пересоберите образ:
+1. Rebuild the image:
     ```bash
     docker build -t video_cv_matching_image .
     ```
 
-2. Запустите контейнер заново:
+2. Restart the container:
     ```bash
     docker run -p 8501:8501 video_cv_matching_image
     ```
 
-## Дополнительно
+## Additional information
 
-- **Обновление зависимостей**: если вы изменяете зависимости, не забудьте обновить `requirements.txt` перед пересборкой образа.
-- **Использование Docker Compose**: если проект требует нескольких сервисов, можно добавить файл `docker-compose.yml` для упрощения запуска.
+-**Dependency Update**: If you change dependencies, don't forget to update `requirements.txt `before reassembling the image.
+- **Using Docker Compose**: If the project requires multiple services, you can add the `docker-compose' file.yml` for easier startup.
